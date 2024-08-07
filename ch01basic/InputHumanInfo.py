@@ -13,15 +13,3 @@ print('키 : %.2f' % height)
 print('문자열 함수 format() 사용')
 message = '제 이름은 {}이고, 나이는 {}세입니다.\n제 키는 {}cm입니다.'
 print(message.format(name, age, height))
-
-
-
-
-
-
-
-
-
-
-
-
