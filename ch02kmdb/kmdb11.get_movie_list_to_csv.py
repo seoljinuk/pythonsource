@@ -1,4 +1,5 @@
 import urllib.request
+import urllib.parse
 import json, math
 
 # 해당 사이트에서 발급 받은 키
@@ -25,9 +26,17 @@ def movieExtractor(pageNumber, pageSize, thisYear):
     parameter = '?key=' + service_key
     parameter += '&curPage=' + str(pageNumber)
     parameter += '&itemPerPage=' + str(pageSize)
+    parameter += '&openStartDt=' + str(thisYear)
+
+    movie_name = '행복의 나라'
+    encoded_movie_name = urllib.parse.quote(movie_name, encoding='UTF-8')
+    parameter += '&movieNm=' + encoded_movie_name
+
+    print('[' + encoded_movie_name + ']')
+
 
     url = end_point + parameter
-    print(url)
+    # print(url)
 
     jsonData = getDataFromWeb(url)
 
@@ -44,8 +53,38 @@ def movieExtractor(pageNumber, pageSize, thisYear):
     # end if
 # end def movieExtractor
 
+import pandas as pd
+
+# 영화 정보를 저장할 데이터 프레임
+movieTable = pd.DataFrame()
+
 def makeMovieTable(movieData):
-    pass
+    for onemovie in movieData['movieListResult']['movieList']:
+        # print(onemovie['movieCd'])
+        onedict = {
+            'movieCd': onemovie['movieCd'],
+            'movieNm': onemovie['movieNm'],
+            'movieNmEn': onemovie['movieNmEn'],
+            'prdtYear': onemovie['prdtYear'],
+            'openDt': onemovie['openDt'],
+            'typeNm': onemovie['typeNm'],
+            'prdtStatNm': onemovie['prdtStatNm'],
+            'nationAlt': onemovie['nationAlt'],
+            'genreAlt': onemovie['genreAlt'],
+            'repNationNm': onemovie['repNationNm'],
+            'repGenreNm': onemovie['repGenreNm']
+        }
+        # print(onedict)
+
+        oneframe = pd.DataFrame(onedict, index=[0])
+        # print(oneframe)
+
+        global movieTable # 전역 변수임을 알리기 위햐여 global 키워드를 사용합니다.
+
+        # 이번에 생성된 데이터 프레임 oneframe을 movieTable에 누적시킵니다.
+        movieTable = pd.concat([movieTable, oneframe])
+
+    print('-'*30)
 # end def makeMovieTable
 
 print('크롤링 중입니다. 잠시만 기다려 주세요.')
@@ -59,7 +98,7 @@ for thisYear in range(startYear, endYear):
 
     while True:
         movieData = movieExtractor(pageNumber, pageSize, thisYear)
-        print(movieData)
+        # print(movieData)
 
         try:
             totCnt = movieData['movieListResult']['totCnt']
@@ -77,9 +116,10 @@ for thisYear in range(startYear, endYear):
 
         totalPage = math.ceil(totCnt/pageSize)
         print('진행 중인 페이지 : ' + str(pageNumber) + '/' + str(totalPage))
+        makeMovieTable(movieData)
 
-        # if pageNumber == totalPage:
-        if pageNumber == 3:
+        if pageNumber == totalPage:
+        # if pageNumber == 3:
             break # 마지막 페이지에 도달하면 끝내기
 
         pageNumber += 1 # 다음 페이지로 이동하기
@@ -88,11 +128,14 @@ for thisYear in range(startYear, endYear):
 
 print('크롤링이 끝났습니다.')
 
+print(movieTable)
+print(type(movieTable))
+print(movieTable.info())
 
-
-
-
-
+# csv(comma separate value) : 텍스트 형식의 파일로 엑셀에서 열수 있습니다.
+filename = 'kmdb_get_movie_list.csv'
+movieTable.to_csv(filename, index=False, encoding='UTF-8')
+print(filename + ' 파일이 저장되었습니다.')
 
 
 
