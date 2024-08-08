@@ -28,12 +28,10 @@ def movieExtractor(pageNumber, pageSize, thisYear):
     parameter += '&itemPerPage=' + str(pageSize)
     parameter += '&openStartDt=' + str(thisYear)
 
-    movie_name = '행복의 나라'
-    encoded_movie_name = urllib.parse.quote(movie_name, encoding='UTF-8')
-    parameter += '&movieNm=' + encoded_movie_name
-
-    print('[' + encoded_movie_name + ']')
-
+    # movie_name = '행복의 나라'
+    # encoded_movie_name = urllib.parse.quote(movie_name, encoding='UTF-8')
+    # parameter += '&movieNm=' + encoded_movie_name
+    # print('[' + encoded_movie_name + ']')
 
     url = end_point + parameter
     # print(url)
@@ -136,7 +134,3 @@ print(movieTable.info())
 filename = 'kmdb_get_movie_list.csv'
 movieTable.to_csv(filename, index=False, encoding='UTF-8')
 print(filename + ' 파일이 저장되었습니다.')
-
-
-
-
